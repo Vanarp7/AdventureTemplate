@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 /***
  * A room in the game. A room contains a 2d int array to represent the things in
  * the room. See the Game class for int constants that represent different game
@@ -7,28 +9,34 @@
  * @author David
  */
 public class Room {
-	private int[][] room; 					// 2d grid for the room
-	private static String[] displaySymbols = { ".", " ", "*", "X", "W" };
-	private int width, height;
-	private String longDescription;
-	private String shortDescription;
+	ArrayList<Wall> walls = new ArrayList<Wall>();
+	ArrayList<Enemy> enemies = new ArrayList<Enemy>();
+	Player player = new Player(this);
+	private Entity[][] room; 					// 2d grid for the room
 
 	public Room(int w, int h) {
-		width = w;
-		height = h;
-		room = new int[h][w];
+		room = new Entity[h][w];
 		addBorder();
 	}
 
 	// Adds a border of wall objects around the edges of the room
 	private void addBorder() {
 		for (int i = 0; i < room.length; i++) {
-			room[i][0] = room[i][room[0].length - 1] = Game.WALL;
+			addWall(i, 0);
+			addWall(i, room[0].length - 1);
 		}
-
 		for (int j = 0; j < room[0].length; j++) {
-			room[0][j] = room[room.length - 1][j] = Game.WALL;
+			addWall(0, j);
+			addWall(room.length - 1, j);
 		}
+	}
+	
+	public void addWall(int row, int col) {
+		addWall(new Location(row, col));
+	}
+	
+	public void addWall(Location loc) {
+		put(loc, new Wall(this));
 	}
 
 	/**
@@ -39,12 +47,9 @@ public class Room {
 	 * @param col the column in the room grid
 	 * @return what is at that location in the room.
 	 */
-	public int get(int row, int col) {
-		if (isInRoom(row, col)) {
-			return room[row][col];
-		} else {
-			return Game.INVALID;
-		}
+	public Entity get(Location loc) {
+		if(isInRoom(loc)) return room[loc.row][loc.col];
+		else return null;
 	}
 
 	/**
@@ -55,9 +60,14 @@ public class Room {
 	 * @param col the column to place the new value
 	 * @param value the value to be placed at (row, col)
 	 */
-	public void put(int row, int col, int value) {
-		if (isInRoom(row, col))
-			room[row][col] = value;
+	public void put(Location loc, Entity object) {
+		if (isInRoom(loc) && isEmpty(loc)) {
+			Entity newObject = new Entity(object.getLoc(), this);
+			room[loc.row][loc.col] = newObject;
+			if(object instanceof Enemy) enemies.add((Enemy) newObject);
+			else if(object instanceof Wall) walls.add((Wall) newObject);
+			else if(object instanceof Player) player = (Player) newObject;
+		}
 	}
 
 	/**
@@ -65,14 +75,13 @@ public class Room {
 	 * gets displayed by the GUI class and what the user sees.
 	 */
 	public String toString() {
-		Location playerLoc = getPlayerLoc();
 		StringBuilder b = new StringBuilder();
 		for (int r = 0; r < room.length; r++) {
 			for (int c = 0; c < room[0].length; c++) {
 				Location loc = new Location(r, c);
-				if(getDistance(loc, playerLoc) > Player.VISIBLE_RANGE && room[r][c] != Game.WALL)
-					b.append(displaySymbols[Game.INVISIBLE]);
-				else b.append(displaySymbols[room[r][c]]);
+				if(getDistance(loc, player.getLoc()) > player.getSight() && !(room[r][c] instanceof Wall))
+					b.append("");
+				else b.append(room[r][c].getSymbol());
 			}
 			b.append("\n");
 		}
@@ -87,9 +96,9 @@ public class Room {
 		return room.length;
 	}
 
-	// return true if (newrow, newcol) is Game.EMPTY
-	boolean isEmpty(int newrow, int newcol) {
-		return get(newrow, newcol) == Game.EMPTY;
+	// return true if (row, col) is Game.EMPTY
+	boolean isEmpty(int row, int col) {
+		return get(new Location(row, col)) == null;
 	}
 
 	// return true if Location loc is Game.EMPTY
@@ -101,16 +110,12 @@ public class Room {
 	// This places the element at the new location and sets
 	// the previous location to Game.EMPTY
 	void moveElementAt(Location loc, int direction) {
-		if (!isInRoom(loc))
-			return;
-
+		if (!isInRoom(loc)) return;
 		Location moveTo = Location.locationInDirection(loc, direction);
-
-		if (!isInRoom(moveTo))
-			return;
+		if (!isInRoom(moveTo)) return;
 
 		room[moveTo.row][moveTo.col] = room[loc.row][loc.col]; // move thing
-		room[loc.row][loc.col] = Game.EMPTY; // old square empty
+		room[loc.row][loc.col] = null; // old square empty
 	}
 	
 	public static boolean areAdjacent(Location a, Location b){
@@ -121,16 +126,10 @@ public class Room {
 
 	// return true if (row, col) is a valid location in the room
 	public boolean isInRoom(int row, int col) {
-		if (row < 0 || col < 0) {
-			return false;
-		}
-		if (row >= room.length) {
-			return false;
-		}
-		if (col >= room[0].length) {
-			return false;
-		}
-		return true;
+		if (row < 0 || col < 0) return false;
+		else if (row >= room.length) return false;
+		else if (col >= room[0].length) return false;
+		else return true;
 	}
 
 	public boolean isInRoom(Location loc) {
@@ -138,24 +137,18 @@ public class Room {
 	}
 
 	// return a random location in the room
-	public Location getRandomLocation() {
-		return new Location((int) (Math.random() * height),
-				(int) (Math.random() * width));
+	public Location getRandomEmptyLocation() {
+		int row, col;
+		do {
+			row = (int) (Math.random() * getHeight());
+			col = (int) (Math.random() * getWidth());
+		} while(!isEmpty(row, col));
+		return new Location(row, col);
 	}
 	
 	public static double getDistance(Location a, Location b) {
 		double rowDiff = a.row - b.row;
 		double colDiff = a.col - b.col;
 		return Math.sqrt(rowDiff * rowDiff + colDiff * colDiff);
-	}
-	
-	public Location getPlayerLoc() {
-		for (int r = 0; r < room.length; r++) {
-			for (int c = 0; c < room[0].length; c++) {
-				if(get(r, c) == Game.PLAYER) 
-					return new Location(r, c);
-			}
-		}
-		return null;
 	}	
 }

@@ -3,39 +3,25 @@
  * 
  * @author David
  */
-public class Player {
-    public static final int VISIBLE_RANGE = 5;
-    private Room currentRoom;				// room player is in
-    private Location loc;					// location of the player in the room
+public class Player extends Animate{
+    private int sight;
     
-    public Player(Room r) {
-        currentRoom = r;
-        loc = new Location(currentRoom.getHeight()/2, currentRoom.getWidth()/2);
-        currentRoom.put(loc.row, loc.col, Game.PLAYER);
+    public Player(Room room) {
+    	super(room, "*");
     }
     
-    // returns true if player was able to move in that direction.
-    public boolean move(int direction) {
-        Location moveTo = Location.locationInDirection(loc, direction);
-        
-        if (currentRoom.isEmpty(moveTo.row, moveTo.col)) {
-            currentRoom.moveElementAt(loc, direction);
+    public Player(Location loc, Room room) {
+    	super(loc, room, "*");
+    }
 
-            loc = moveTo;   // update own location
-            return true;
-        }
-        
-        return false;
+    // returns true if player was able to move in that direction.
+    public void move(int direction) {
+        setLoc(Location.locationInDirection(getLoc(), direction));
     }
     
     public void escape() {
-    	Location a;
-		currentRoom.put(getLoc().row, getLoc().col, Game.EMPTY);
-		do {
-			a = currentRoom.getRandomLocation();
-		} while (!currentRoom.isEmpty(a));
-		setLoc(a);
-		currentRoom.put(a.row, a.col, Game.PLAYER);
+    	Location a = room.getRandomEmptyLocation();
+    	setLoc(a);
     }
     
     public String interact(String action, Wumpus enemy) {
@@ -43,12 +29,8 @@ public class Player {
 		return "You are too far to " + action + "!";
     }
 
-    public Location getLoc() {
-		return loc;
-	}
-    
-	public void setLoc(Location loc) {
-		this.loc = loc;
+	public int getSight() {
+		return sight;
 	}
 
 }
