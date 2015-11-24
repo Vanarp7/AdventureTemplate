@@ -4,6 +4,7 @@
  * @author David
  */
 public class Player {
+    public static final int VISIBLE_RANGE = 5;
     private Room currentRoom;				// room player is in
     private Location loc;					// location of the player in the room
     
@@ -26,4 +27,28 @@ public class Player {
         
         return false;
     }
+    
+    public void escape() {
+    	Location a;
+		currentRoom.put(getLoc().row, getLoc().col, Game.EMPTY);
+		do {
+			a = currentRoom.getRandomLocation();
+		} while (!currentRoom.isEmpty(a));
+		setLoc(a);
+		currentRoom.put(a.row, a.col, Game.PLAYER);
+    }
+    
+    public String interact(String action, Wumpus enemy) {
+		if (Room.areAdjacent(getLoc(), enemy.getLoc())) return "You are " + action + "ing the wumpus!";
+		return "You are too far to " + action + "!";
+    }
+
+    public Location getLoc() {
+		return loc;
+	}
+    
+	public void setLoc(Location loc) {
+		this.loc = loc;
+	}
+
 }

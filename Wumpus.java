@@ -11,7 +11,11 @@ public class Wumpus {
         currentRoom = r;      
         row = 6;
         col = 8;
-        currentRoom.put(row, col, 3);			// THIS IS BAD.  WHY?
+        currentRoom.put(row, col, Game.WUMPUS);	
+    }
+    
+    public void move() {
+    	randomMove();
     }
     
     // returns true if enemy was able to move in that direction.
@@ -25,8 +29,8 @@ public class Wumpus {
         if (direction == Location.WEST) newcol--;
         
         if (currentRoom.isEmpty(newrow, newcol)) {
-            currentRoom.put(row, col, 0);
-            currentRoom.put(newrow, newcol, 3);
+            currentRoom.put(row, col, Game.EMPTY);
+            currentRoom.put(newrow, newcol, Game.WUMPUS);
             row = newrow;
             col = newcol;
             return true;
@@ -35,8 +39,48 @@ public class Wumpus {
         return false;
     }
     
-    public void randomMove() {
-        // you can fill this one
-        return;
+    public Location getLoc() {
+    	return new Location(row,col);
     }
+    
+    public void moveAwayFromPlayer() {
+    	Location playerLoc = currentRoom.getPlayerLoc();
+    	double mostDist = Double.MIN_VALUE;
+    	int index = 0;
+    	
+    	for(int i = 0; i < 4; i++) {
+    		Location loc = Location.locationInDirection(getLoc(), i);
+    		if(currentRoom.isEmpty(loc)) {
+        		double distance = Room.getDistance(playerLoc, loc);
+        		if(distance > mostDist) {
+        			mostDist = distance;
+        			index = i;
+        		}
+    		}
+    	}
+    	move(index);
+    }
+    
+    public void moveTowardPlayer() {
+    	Location playerLoc = currentRoom.getPlayerLoc();
+    	double leastDist = Double.MAX_VALUE;
+    	int index = 0;
+    	
+    	for(int i = 0; i < 4; i++) {
+    		Location loc = Location.locationInDirection(getLoc(), i);
+    		if(currentRoom.isEmpty(loc)) {
+        		double distance = Room.getDistance(playerLoc, loc);
+        		if(distance < leastDist) {
+        			leastDist = distance;
+        			index = i;
+        		}
+    		}
+    	}
+    	move(index);
+    }
+    
+    public void randomMove() {
+        move((int) (Math.random()*4));
+    }
+    
 }

@@ -8,7 +8,7 @@
  */
 public class Room {
 	private int[][] room; 					// 2d grid for the room
-	private static String[] displaySymbols = { ".", "*", "X", "W" };
+	private static String[] displaySymbols = { ".", " ", "*", "X", "W" };
 	private int width, height;
 	private String longDescription;
 	private String shortDescription;
@@ -23,11 +23,11 @@ public class Room {
 	// Adds a border of wall objects around the edges of the room
 	private void addBorder() {
 		for (int i = 0; i < room.length; i++) {
-			room[i][0] = room[i][room[0].length - 1] = 2;
+			room[i][0] = room[i][room[0].length - 1] = Game.WALL;
 		}
 
 		for (int j = 0; j < room[0].length; j++) {
-			room[0][j] = room[room.length - 1][j] = 2;
+			room[0][j] = room[room.length - 1][j] = Game.WALL;
 		}
 	}
 
@@ -65,10 +65,14 @@ public class Room {
 	 * gets displayed by the GUI class and what the user sees.
 	 */
 	public String toString() {
+		Location playerLoc = getPlayerLoc();
 		StringBuilder b = new StringBuilder();
 		for (int r = 0; r < room.length; r++) {
 			for (int c = 0; c < room[0].length; c++) {
-				b.append(displaySymbols[room[r][c]]);
+				Location loc = new Location(r, c);
+				if(getDistance(loc, playerLoc) > Player.VISIBLE_RANGE && room[r][c] != Game.WALL)
+					b.append(displaySymbols[Game.INVISIBLE]);
+				else b.append(displaySymbols[room[r][c]]);
 			}
 			b.append("\n");
 		}
@@ -85,7 +89,7 @@ public class Room {
 
 	// return true if (newrow, newcol) is Game.EMPTY
 	boolean isEmpty(int newrow, int newcol) {
-		return get(newrow, newcol) == 0;
+		return get(newrow, newcol) == Game.EMPTY;
 	}
 
 	// return true if Location loc is Game.EMPTY
@@ -107,6 +111,12 @@ public class Room {
 
 		room[moveTo.row][moveTo.col] = room[loc.row][loc.col]; // move thing
 		room[loc.row][loc.col] = Game.EMPTY; // old square empty
+	}
+	
+	public static boolean areAdjacent(Location a, Location b){
+		int rowDiff = Math.abs(a.row - b.row);
+		int colDiff = Math.abs(a.col - b.col);
+		return rowDiff <= 1 && colDiff <= 1;
 	}
 
 	// return true if (row, col) is a valid location in the room
@@ -132,4 +142,20 @@ public class Room {
 		return new Location((int) (Math.random() * height),
 				(int) (Math.random() * width));
 	}
+	
+	public static double getDistance(Location a, Location b) {
+		double rowDiff = a.row - b.row;
+		double colDiff = a.col - b.col;
+		return Math.sqrt(rowDiff * rowDiff + colDiff * colDiff);
+	}
+	
+	public Location getPlayerLoc() {
+		for (int r = 0; r < room.length; r++) {
+			for (int c = 0; c < room[0].length; c++) {
+				if(get(r, c) == Game.PLAYER) 
+					return new Location(r, c);
+			}
+		}
+		return null;
+	}	
 }
