@@ -10,8 +10,8 @@ public class Player extends Animate{
     	super(room, "*");
     }
     
-    public Player(Location loc, Room room) {
-    	super(loc, room, "*");
+    public Player(Room room, Location loc) {
+    	super(room, loc, "*");
     }
 
     // returns true if player was able to move in that direction.

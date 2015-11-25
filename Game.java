@@ -10,14 +10,6 @@ public class Game {
 		RIGHT, LEFT, UP, DOWN
 	};
 
-	// possible values for locations in a Room object
-	static final int INVALID = -1;
-	static final int EMPTY = 0;
-	static final int INVISIBLE = 1;
-	static final int PLAYER = 2;
-	static final int WALL = 3;
-	static final int WUMPUS = 4;
-
 	private Room currentRoom;
 	private Player player;
 	private Wumpus enemy;

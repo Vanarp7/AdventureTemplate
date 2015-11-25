@@ -9,11 +9,8 @@ import java.util.ArrayList;
  * @author David
  */
 public class Room {
-	ArrayList<Wall> walls = new ArrayList<Wall>();
-	ArrayList<Enemy> enemies = new ArrayList<Enemy>();
-	Player player = new Player(this);
 	private Entity[][] room; 					// 2d grid for the room
-
+	
 	public Room(int w, int h) {
 		room = new Entity[h][w];
 		addBorder();
@@ -36,7 +33,7 @@ public class Room {
 	}
 	
 	public void addWall(Location loc) {
-		put(loc, new Wall(this));
+		put(loc, new Wall(this, loc));
 	}
 
 	/**
@@ -61,13 +58,7 @@ public class Room {
 	 * @param value the value to be placed at (row, col)
 	 */
 	public void put(Location loc, Entity object) {
-		if (isInRoom(loc) && isEmpty(loc)) {
-			Entity newObject = new Entity(object.getLoc(), this);
-			room[loc.row][loc.col] = newObject;
-			if(object instanceof Enemy) enemies.add((Enemy) newObject);
-			else if(object instanceof Wall) walls.add((Wall) newObject);
-			else if(object instanceof Player) player = (Player) newObject;
-		}
+		if (isInRoom(loc)) room[loc.row][loc.col] = object;
 	}
 
 	/**
@@ -79,9 +70,11 @@ public class Room {
 		for (int r = 0; r < room.length; r++) {
 			for (int c = 0; c < room[0].length; c++) {
 				Location loc = new Location(r, c);
-				if(getDistance(loc, player.getLoc()) > player.getSight() && !(room[r][c] instanceof Wall))
-					b.append("");
+//				if(getDistance(loc, player.getLoc()) > player.getSight() && !(room[r][c] instanceof Wall))
+//					b.append(" ");
+				if(isEmpty(r, c)) b.append(".");
 				else b.append(room[r][c].getSymbol());
+
 			}
 			b.append("\n");
 		}

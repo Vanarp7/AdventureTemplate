@@ -9,8 +9,8 @@ public class Wumpus extends Enemy{
     	super(room, "W");
     }
     
-    public Wumpus(Location loc, Room room) {
-    	super(loc, room, "W");
+    public Wumpus(Room room, Location loc) {
+    	super(room, loc, "W");
     }
 
     public void move() {

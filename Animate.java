@@ -6,8 +6,8 @@ public class Animate extends Entity {
 		alive = true;
 	}
 
-	public Animate(Location loc, Room room) {
-		super(loc, room);
+	public Animate(Room room, Location loc) {
+		super(room, loc);
 		alive = true;
 	}
 
@@ -16,8 +16,8 @@ public class Animate extends Entity {
 		alive = true;
 	}
 
-	public Animate(Location loc, Room room, String symbol) {
-		super(loc, room, symbol);
+	public Animate(Room room, Location loc, String symbol) {
+		super(room, loc, symbol);
 		alive = true;
 	}
 

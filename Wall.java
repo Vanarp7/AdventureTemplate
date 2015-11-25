@@ -4,7 +4,7 @@ public class Wall extends Entity {
 		super(room, "X");
 	}
 
-	public Wall(Location loc, Room room) {
-		super(loc, room, "X");
+	public Wall(Room room, Location loc) {
+		super(room, loc, "X");
 	}
 }

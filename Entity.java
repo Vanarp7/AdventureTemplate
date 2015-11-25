@@ -1,27 +1,27 @@
 public class Entity {
-	private String symbol;
-	private Location loc;
 	protected Room room;
+	private Location loc;
+	private String symbol;
 	
 	public Entity(Room room) {
-		setLoc(room.getRandomEmptyLocation());
 		this.room = room;
+		setLoc(room.getRandomEmptyLocation());
 	}
 	
-	public Entity(Location loc, Room room) {
-		setLoc(loc);
+	public Entity(Room room, Location loc) {
 		this.room = room;
+		setLoc(loc);
 	}
 	
 	public Entity(Room room, String symbol) {
-		setLoc(room.getRandomEmptyLocation());
 		this.room = room;
+		setLoc(room.getRandomEmptyLocation());
 		this.symbol = symbol;
 	}
 
-	public Entity(Location loc, Room room, String symbol) {
-		setLoc(loc);
+	public Entity(Room room, Location loc, String symbol) {
 		this.room = room;
+		setLoc(loc);
 		this.symbol = symbol;
 	}
 
@@ -30,9 +30,11 @@ public class Entity {
 	}
 
 	public void setLoc(Location newLoc) {
-		if(this.loc != null) room.put(loc, null);
-		loc = new Location(newLoc.row, newLoc.col);
-		room.put(newLoc, this);
+		if(room.isEmpty(newLoc)) {
+			if(loc != null) room.put(loc, null);
+			loc = new Location(newLoc.row, newLoc.col);
+			room.put(newLoc, this);
+		}
 	}
 
 	public Room getRoom() {

@@ -6,8 +6,8 @@ public class PopStar extends Enemy{
 		// TODO Auto-generated constructor stub
 	}
 
-	public PopStar(Location loc, Room room) {
-		super(loc, room);
+	public PopStar(Room room, Location loc) {
+		super(room, loc);
 		// TODO Auto-generated constructor stub
 	}
 
